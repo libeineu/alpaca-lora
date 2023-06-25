@@ -247,7 +247,7 @@ def train(
             eval_steps=200 if val_set_size > 0 else None,
             save_steps=200,
             output_dir=output_dir,
-            save_total_limit=3,
+            save_total_limit=10,
             load_best_model_at_end=True if val_set_size > 0 else False,
             ddp_find_unused_parameters=False if ddp else None,
             group_by_length=group_by_length,
@@ -274,6 +274,42 @@ def train(
         trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
     model.save_pretrained(output_dir)
+
+
+    # def save_model(save_directory):
+    #     if os.path.isfile(save_directory):
+    #         raise ValueError(f"Provided path ({save_directory}) should be a directory, not a file")
+    #     os.makedirs(save_directory, exist_ok=True)
+
+    #     #保存adapter参数
+    #     for adapter_name, peft_config in model.peft_config.items():
+    #         # save only the Lora weights
+    #         output_state_dict = lora_state_dict()
+    #         output_dir = os.path.join(save_directory, adapter_name) if adapter_name != "default" else save_directory
+    #         os.makedirs(output_dir, exist_ok=True)
+    #         torch.save(output_state_dict, os.path.join(output_dir, WEIGHTS_NAME))
+
+    #         # save the config and change the inference mode to `True`
+    #         if peft_config.base_model_name_or_path is None:
+    #             peft_config.base_model_name_or_path = (
+    #                 self.base_model.__dict__.get("name_or_path", None)
+    #                 if isinstance(peft_config, PromptLearningConfig)
+    #                 else self.base_model.model.__dict__.get("name_or_path", None)
+    #             )
+    #         inference_mode = peft_config.inference_mode
+    #         peft_config.inference_mode = True
+    #         peft_config.save_pretrained(output_dir)
+    #         peft_config.inference_mode = inference_mode
+
+    #     # 保存lm_head参数
+    #     # all_state_dict = old_state_dict()
+    #     # lm_state_dict = {}
+    #     # for key in all_state_dict.keys():
+    #     #     if "lm_head" in key:
+    #     #         lm_state_dict[key] = all_state_dict[key]
+    #     # torch.save(lm_state_dict, os.path.join(output_dir, "lm_head.bin"))
+
+    # save_model(output_dir)
 
     print(
         "\n If there's a warning about missing keys above, please disregard :)"

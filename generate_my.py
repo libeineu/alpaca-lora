@@ -38,8 +38,8 @@ from typing import List, Optional, Tuple, Union
 
 def main(
         load_8bit: bool = False,
-        base_model: str = "",
-        lora_weights: str = "tloen/alpaca-lora-7b",
+        base_model: str = "../alpaca13b",
+        lora_weights: str = "/home/v-lbei/alpaca-lora/625_7b",
         prompt_template: str = "",  # The prompt template to use, will default to alpaca.
         server_name: str = "0.0.0.0",  # Allows to listen on all interfaces by providing '0.
         share_gradio: bool = False,
@@ -50,6 +50,9 @@ def main(
     assert (
         base_model
     ), "Please specify a --base_model, e.g. --base_model='huggyllama/llama-7b'"
+
+    # 后面多了一个/r
+    lora_weights = lora_weights.strip()
 
     prompter = Prompter(prompt_template)
     tokenizer = LlamaTokenizer.from_pretrained(base_model)
