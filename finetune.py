@@ -181,16 +181,16 @@ def train(
         bias="none",
         task_type="CAUSAL_LM",
     )
-    # model = get_peft_model(model, config)
+    model = get_peft_model(model, config)
 
-    if type(lora_weights) is str and os.path.exists(lora_weights):
-        model = PeftModel.from_pretrained(
-            model,
-            lora_weights,
-            torch_dtype=torch.float16,
-        )
-    else:
-        model = get_peft_model(model, config)
+    # if type(lora_weights) is str and os.path.exists(lora_weights):
+    #     model = PeftModel.from_pretrained(
+    #         model,
+    #         lora_weights,
+    #         torch_dtype=torch.float16,
+    #     )
+    # else:
+    #     model = get_peft_model(model, config)
 
     if data_path.endswith(".json") or data_path.endswith(".jsonl"):
         data = load_dataset("json", data_files=data_path)
