@@ -53,6 +53,7 @@ def main(
 
     # 后面多了一个/r
     lora_weights = lora_weights.strip()
+    base_model = base_model.strip()
 
     prompter = Prompter(prompt_template)
     tokenizer = LlamaTokenizer.from_pretrained(base_model)
