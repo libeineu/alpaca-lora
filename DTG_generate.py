@@ -49,7 +49,10 @@ def main(
         server_name: str = "0.0.0.0",  # Allows to listen on all interfaces by providing '0.
         share_gradio: bool = False,
         batch_size: int = None,
-        test_file: str = "/home/v-lbei/deen",
+        test_file: str = "/home/v-lbei/deen/test",
+        prompt_num: int = 1,
+        output_file: str = "./dtg_shot1",
+        mode: str = "dtg",
 ):
 
     print(f"base_model:{base_model}")
@@ -126,7 +129,7 @@ def main(
     def format_in_template(src, tgt=None, 
         src_name="en",
         tgt_name="zh",
-        line_break=' '):
+        mode='base'):
         # line-break includes space, \n, special symbols. use space for now
         if src_name == "en" and tgt_name == "zh":
             src_str = "English"
@@ -186,16 +189,25 @@ def main(
         else:
             raise NotImplementedError
 
-        if tgt is not None:
-            return f"Translate this into 1. {tgt_str}:\n\n{src}\n\n1. {tgt}"
-        else:
-            return f"Translate this into 1. {tgt_str}:\n\n{src}\n\n1."
+
+        # if tgt is not None:
+        #     return f"Translate {src_str} to {tgt_str}:\n\n### Input:\n{src} =>\n\n### Response:\n{tgt}"
+        # else:
+        #     return f"Translate {src_str} to {tgt_str}:\n\n{src} =>\n\n"
+
+        assert mode == "base" or mode == "dtg", "mode must be base or dtg"
+        if mode == "base":
+            return f"Translate {src_str} to {tgt_str}:\n\n### Input:\n{src} =>\n\n### Response:\n{tgt}"
+        elif mode == "dtg":
+            return f"Translate {src_str} to {tgt_str}. Given the {src_str} sentence and the {tgt_str} translation, your task is to detect the error type firstly, and refine the translation then:\n\n### Input:\nsource sentence: {src}\nthe already generated target sentence is .\n\n### Response:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
+        
 
 
     def create_dataset(data_store_path, test_data_path,
             src="en", 
             tgt="de",
             prompt_num=1,
+            mode='base',
     ):
         test_src = read_lines(f'{test_data_path}.{src}')
         datastore_src = read_lines(f'{data_store_path}.{src}')
@@ -208,8 +220,8 @@ def main(
             for i in range(prompt_num):
                 src_line = datastore_src[i]
                 tgt_line = datastore_tgt[i]
-                prompts.append(format_in_template(src_line, tgt=tgt_line, src_name=src, tgt_name=tgt))
-            prompts.append(format_in_template(test_src_line, src_name=src, tgt_name=tgt))
+                prompts.append(format_in_template(src_line, tgt=tgt_line, src_name=src, tgt_name=tgt, mode=mode))
+            # prompts.append(format_in_template(test_src_line, src_name=src, tgt_name=tgt))
             data_with_prompt.append("\n".join(prompts))
             
         return data_with_prompt
@@ -305,132 +317,75 @@ def main(
     tgt = "en"
     shot = 0  # "zero" "one" "few"
 
-    output_file_name = lora_weights.split("/")[-1] + ".out"
-    output_file = open(output_file_name, "w", encoding="utf-8")
+    # output_file_name = lora_weights.split("/")[-1] + ".out"
+    fw_file = open(output_file, "w", encoding="utf-8")
 
+    input_file = open(os.path.join(test_file, "test." + src), "r", encoding="utf-8")
 
-    if task_tag == "read":
-        def construct_prompt(real_data, index):
-            out_line = "\"\"\"\n"
-            out_line += "article: \n"
-            out_line = out_line + real_data["article"] + "\n"
-            out_line += "questions: \n"
-            out_line = out_line + real_data["questions"][index] + "\n"
-            out_line += "options: \n"
-            for idx in range(len(real_data["options"][index])):
-                out_line = out_line + options_tag[idx] + ". " + real_data["options"][index][idx] + "\n"
-            out_line += "answers: \"\"\""
-            print(f"out_line is : {len(out_line)}")
-            return out_line
+    input_lines = input_file.readlines()
+    input_lines_len = len(input_lines)
 
-        for set_item in data_name:
-            new_path = os.path.join(file_dir, set_item)
-            for domain_item in domain:
-                final_path = os.path.join(new_path, domain_item)
-                file_list = os.listdir(final_path)
-                output_file = open(os.path.join(final_path, "test.alpaca_lora_sys"), "w", encoding="utf-8")
-                line_index = 0
-                for item in file_list:
-                    real_data_path = os.path.join(final_path, item)
-                    data_file = open(real_data_path, 'r', encoding="utf-8")
-                    real_data = json.load(data_file)
-                    for i in range(len(real_data["answers"])):
-                        print("========================")
-                        line_index += 1
-                        print(f"start generate line {line_index}\n")
-                        instruction = construct_prompt(real_data, i)
-                        print(f"prompt is : \n{instruction}\n")
-                        result = evaluate(instruction)
-                        real_result = result.split("\n")[0].strip("\n").strip(" ")
-                        print(f"Response: {result}")
-                        print(f"real_result output is : {real_result}")
-                        print("========================")
-                    data_file.close()
-                output_file.close()
+    batch_list = []
+    line_list = []
 
-    elif task_tag == "translation":
-        input_file = open(os.path.join(test_file, "test." + src), "r", encoding="utf-8")
-        train_file_src = open(os.path.join(test_file, "train." + src), "r", encoding="utf-8")
-        train_file_tgt = open(os.path.join(test_file, "train." + tgt), "r", encoding="utf-8")
+    dataset = create_dataset(os.path.join(test_file, "dev"), os.path.join(test_file, "test"), src, tgt, prompt_num, mode=mode)
 
-        input_lines = input_file.readlines()
-        input_lines_len = len(input_lines)
+    # print(dataset[0])
 
-        def random_select_train():
-            all_sen_src = train_file_src.readlines()
-            all_sen_tgt = train_file_tgt.readlines()
-            if shot == 1:
-                seed = random.randint(0, len(all_sen_src) - 1)
-                src_line = all_sen_src[seed].strip("\n").strip("\t").strip(" ")
-                tgt_line = all_sen_tgt[seed].strip("\n").strip("\t").strip(" ")
-                shot_line = src_line + " => " + tgt_line + "\n\n"
-                print(f"promte few shot is : {shot_line}")
-                return shot_line
-            elif shot > 1:
-                shot_line = ""
-                for i in range(shot):
-                    seed = random.randint(0, len(all_sen_src) - 1)
-                    src_line = all_sen_src[seed].strip("\n").strip("\t").strip(" ")
-                    tgt_line = all_sen_tgt[seed].strip("\n").strip("\t").strip(" ")
-                    shot_line = shot_line + src_line + " => " + tgt_line + "\n\n"
-                print(f"promte few shot is : {shot_line}")
-                return shot_line
-            train_file_src.close()
-            train_file_tgt.close()
-            return None
+    line_index = 0
+    shot_line = None
+    for line in input_lines:
+        line_index += 1
+        # instruction = "Translate German to English:"
+        # if shot_line is not None:
+        #     instruction = instruction + "\n\n" + shot_line
+        instruction = dataset[line_index - 1]
 
-        batch_list = []
-        line_list = []
-
-        line_index = 0
-        shot_line = random_select_train()
-        for line in input_lines:
-            line_index += 1
-            instruction = "Translate German to English:"
-            if shot_line is not None:
-                instruction = instruction + "\n\n" + shot_line
-
-            if batch_size is not None and batch_size != 1:
-                if line_index % batch_size == 0:
-                    print("========================")
-                    print("start generate line {}\n".format(range(line_index - batch_size, line_index - 1)))
-                    print("Instruction:", instruction)
-                    
-                line_list.append(line)
-                prompt = prompter.generate_prompt(instruction, line.strip("\n").strip(" ") + " => ")
-                batch_list.append(prompt)
-
-            else:
+        if batch_size is not None and batch_size != 1:
+            if line_index % batch_size == 0:
                 print("========================")
-                print(f"start generate line {line_index}\n")
-                print("Instruction:", instruction)
+                print("start generate line {}\n".format(range(line_index - batch_size, line_index - 1)))
+                # print("Instruction:", instruction)
+                
+            line_list.append(line)
+            prompt = prompter.generate_prompt(instruction, line.strip("\n").strip(" ") + " => ", mode=mode)
+            # print(f"prompt is :{prompt}")
+            # assert 0
+            batch_list.append(prompt)
 
-            if batch_size is not None and batch_size != 1:
-                if line_index % batch_size != 0 and line_index != input_lines_len:
-                    continue
-                else:
-                    print(f"src list is :{line_list}")
-                    result = evaluate(batch_list, batch_size=batch_size)
-                    batch_list = []
-                    for item_id in range(len(result)):
-                        result_line = prompter.get_response(result[item_id])
-                        print(f"Response--{line_index - batch_size + item_id} : {result_line}")
-                        output_file.write(line_list[item_id].strip("\n").strip(" ") + "\t" + result_line + "\n")
-                    print("========================")
-                    line_list = []
+        else:
+            print("========================")
+            print(f"start generate line {line_index}\n")
+            print("Instruction:", instruction)
+
+        if batch_size is not None and batch_size != 1:
+            if line_index % batch_size != 0 and line_index != input_lines_len:
+                continue
             else:
-                print(f"src is :{line}")
-                result = evaluate(instruction, line.strip("\n").strip(" ") + " => ")
-                real_result = result.split("\n")[0].strip("\n").strip(" ")
-                print(f"Response: {result}")
-                print(f"real_result output is : {real_result}")
+                print(f"src list is :{line_list}")
+                # print(f"batch list is :{batch_list}")
+                # assert 0
+                result = evaluate(batch_list, batch_size=batch_size)
+                batch_list = []
+                for item_id in range(len(result)):
+                    result_line = prompter.get_response(result[item_id])
+                    # print(f"result_line is :{result_line}")
+                    # assert 0
+                    print(f"Response--{line_index - batch_size + item_id} : {result_line}")
+                    fw_file.write(line_list[item_id].strip("\n").strip(" ") + "\t" + result_line + "\n")
                 print("========================")
-                output_file.write(line.strip("\n").strip(" ") + "\t" + real_result + "\n")
+                line_list = []
+        else:
+            print(f"src is :{line}")
+            result = evaluate(instruction, line.strip("\n").strip(" ") + " => ")
+            real_result = result.split("\n")[0].strip("\n").strip(" ")
+            print(f"Response: {result}")
+            print(f"real_result output is : {real_result}")
+            print("========================")
+            fw_file.write(line.strip("\n").strip(" ") + "\t" + real_result + "\n")
 
-        input_file.close()
-        train_file_src.close()
-        train_file_tgt.close()
-        output_file.close()
+    input_file.close()
+    fw_file.close()
     ###########
 
     # testing code for readme

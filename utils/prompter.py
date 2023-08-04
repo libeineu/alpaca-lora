@@ -30,11 +30,16 @@ class Prompter(object):
         instruction: str,
         input: Union[None, str] = None,
         label: Union[None, str] = None,
+        mode: Union[None, str] = None,
     ) -> str:
         # returns the full prompt from instruction and optional input
         # if a label (=response, =output) is provided, it's also appended.
-        if input:
+        if input and mode == "base":
             res = self.template["prompt_input"].format(
+                instruction=instruction, input=input
+            )
+        elif input and mode == "dtg":
+            res = self.template["prompt_input_dtg"].format(
                 instruction=instruction, input=input
             )
         else:
@@ -48,4 +53,4 @@ class Prompter(object):
         return res
 
     def get_response(self, output: str) -> str:
-        return output.split(self.template["response_split"])[1].strip()
+        return output.split(self.template["response_split"])[-1].strip()
