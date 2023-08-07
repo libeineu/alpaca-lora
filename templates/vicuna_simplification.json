@@ -1,7 +1,7 @@
 {
     "description": "Template used by Vicuna.",
     "prompt_input": "A chat between a curious user and an artificial intelligence assistant.\n{instruction}\n###USER:\nPlease provide the simplification of the following paragraph:\n{input}\n###ASSISTANT:\n",
-    "prompt_input_dtg": "A chat between a curious user and an artificial intelligence assistant.\n{instruction}\n###USER:\nGiven the English paragraph: {input}\nthe already generated simplification: .\nPlease detect the error type firstly, and provide the refined simplification of the given paragraph\n###ASSISTANT:\n",
+    "prompt_input_dtg": "A chat between a curious user and an artificial intelligence assistant.\n{instruction}\n###USER:\nGiven the English paragraph: {input}\nthe already generated simplification is: Rollins retired in 1962 and become a coach.\nPlease detect the error type firstly, and provide the refined simplification of the given paragraph\n###ASSISTANT:\n",
     "prompt_no_input": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{instruction}\n\n### Response:\n",
     "response_split": "###ASSISTANT:"    
 }

@@ -45,14 +45,14 @@ def main(
         load_8bit: bool = False,
         base_model: str = "../alpaca13b",
         lora_weights: str = "/home/v-lbei/alpaca-lora/625_7b",
-        prompt_template: str = "vicuna_simplification",  # The prompt template to use, will default to alpaca.
+        prompt_template: str = "vicuna_dialogsum",  # The prompt template to use, will default to alpaca.
         server_name: str = "0.0.0.0",  # Allows to listen on all interfaces by providing '0.
         share_gradio: bool = False,
         batch_size: int = None,
-        test_file: str = "/home/v-lbei/simplification/",
-        prompt_num: int = 5,
-        output_file: str = "./vicuna-simplification-dtg-5shot-v2",
-        mode: str = "dtg",
+        test_file: str = "/home/v-lbei/samsum/",
+        prompt_num: int = 2,
+        output_file: str = "./vicuna-samsum-batch2",
+        mode: str = "base",
 ):
 
     print(f"base_model:{base_model}")
@@ -131,12 +131,11 @@ def main(
         tgt_name="zh",
         mode='base'):
 
-        sys_line = "Rollins retired in 1962 and become a coach."
         assert mode == "base" or mode == "dtg", "mode must be base or dtg"
         if mode == "base":
-            return f"###USER: Please provide the simplification of the following paragraph:\n{src}\n###ASSISTANT:\n{tgt}"
+            return f"###USER:\nGiven the English dialogue: {src}\n please summarize the main context\n###ASSISTANT:\n{tgt}"
         elif mode == "dtg":
-            return f"###USER:\nGiven the English paragraph: {src}\nthe already generated simplification is: {sys_line}\nPlease detect the error type firstly, and provide the refined simplification of the given paragraph\n###ASSISTANT:\nError type: incorrect simplification, the refined simplification is: {tgt}"
+            return f"###USER:\nGiven the English dialogue: {src}\nthe already summarized main abstraction of the dialogue is: .\nPlease detect the error type firstly, and provide the refined summarization of given dialogue\n###ASSISTANT:\nError type: incorrect summarization, the refined summarization is: {tgt}"
         
     def create_dataset(data_store_path, test_data_path,
             src="en", 

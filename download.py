@@ -8,6 +8,8 @@ urls = {'llama7b': ['https://huggingface.co/decapoda-research/llama-7b-hf/tree/m
         'alpaca-lora': ["https://huggingface.co/tloen/alpaca-lora-7b/tree/main", ''],
         'alpaca7b': ['https://huggingface.co/chavinlo/alpaca-native/tree/main', ''],
         'alpaca13b': ['https://huggingface.co/chavinlo/alpaca-13b/tree/main', ''],
+        'vicuna13b_v1.3': ['https://huggingface.co/lmsys/vicuna-13b-v1.3/tree/main', ''],
+        'vicuna7b_v1.5': ['https://huggingface.co/lmsys/vicuna-7b-v1.5/tree/main', ''],
         'vicuna13b_v1.5': ['https://huggingface.co/lmsys/vicuna-13b-v1.5/tree/main', ''],
         'sharedgpt': ['https://huggingface.co/datasets/philschmid/sharegpt-raw/tree/main/sharegpt_90k_raw_dataset', ''],
         'llama30b': ['https://huggingface.co/decapoda-research/llama-30b-hf/tree/main',

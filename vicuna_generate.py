@@ -51,8 +51,8 @@ def main(
         batch_size: int = None,
         test_file: str = "/home/v-lbei/deen/test",
         prompt_num: int = 1,
-        output_file: str = "./vicuna-1shot-dtg",
-        mode: str = "dtg",
+        output_file: str = "./output/vicuna7b-v1.5.base",
+        mode: str = "base",
 ):
 
     print(f"base_model:{base_model}")
@@ -194,12 +194,12 @@ def main(
         #     return f"Translate {src_str} to {tgt_str}:\n\n### Input:\n{src} =>\n\n### Response:\n{tgt}"
         # else:
         #     return f"Translate {src_str} to {tgt_str}:\n\n{src} =>\n\n"
-
+        sys_line = "Flights from Brisbane to Amsterdam via Shanghai Pudong"
         assert mode == "base" or mode == "dtg", "mode must be base or dtg"
         if mode == "base":
-            return f"###USER: Translate the {src_str} sentence into {tgt_str}.\n{src}\n###ASSISTANT:\n{tgt}"
+            return f"###USER:\nTranslate the {src_str} sentence into {tgt_str}.\n{src}\n###ASSISTANT:\n{tgt}"
         elif mode == "dtg":
-            return f"###USER:\nGiven the {src_str} sentence: {src}\nthe {tgt_str} translation: .\nyour task is to detect the error type firstly, and refine the translation then.\n###ASSISTANT:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
+            return f"###USER:\nGiven the {src_str} sentence: {src}\nthe {tgt_str} translation is: {sys_line}\nyour task is to detect the error type firstly, and refine the translation then.\n###ASSISTANT:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
         
 
 
