@@ -51,7 +51,7 @@ def main(
         batch_size: int = None,
         test_file: str = "/home/v-lbei/deen/test",
         prompt_num: int = 1,
-        output_file: str = "./dtg_shot1",
+        output_file: str = "./alpaca7b_5shot_dtg",
         mode: str = "dtg",
 ):
 
@@ -194,12 +194,19 @@ def main(
         #     return f"Translate {src_str} to {tgt_str}:\n\n### Input:\n{src} =>\n\n### Response:\n{tgt}"
         # else:
         #     return f"Translate {src_str} to {tgt_str}:\n\n{src} =>\n\n"
-
+        
+        sys_line = ""
         assert mode == "base" or mode == "dtg", "mode must be base or dtg"
         if mode == "base":
-            return f"Translate {src_str} to {tgt_str}:\n\n### Input:\n{src} =>\n\n### Response:\n{tgt}"
+            if tgt is not None:
+                return f"Translate {src_str} to {tgt_str}:\n\n### Input:\n{src} =>\n\n### Response:\n{tgt}"
+            else:
+                return f"Translate {src_str} to {tgt_str}:\n\n### Input:\n{src} =>\n\n### Response:"
         elif mode == "dtg":
-            return f"Translate {src_str} to {tgt_str}. Given the {src_str} sentence and the {tgt_str} translation, your task is to detect the error type firstly, and refine the translation then:\n\n### Input:\nsource sentence: {src}\nthe already generated target sentence is .\n\n### Response:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
+            if tgt is not None:
+                return f"Translate {src_str} into {tgt_str}. Given the {src_str} sentence and the {tgt_str} translation, please detect the error type firstly, and refine the translation then:\n### Input:\nsource sentence: {src}\nthe already generated target sentence is {sys_line}.\n### Response:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
+            else:
+                return f"Translate {src_str} into {tgt_str}. Given the {src_str} sentence and the {tgt_str} translation, please detect the error type firstly, and refine the translation then:\n### Input:\nsource sentence: {src}\nthe already generated target sentence is {sys_line}.\n### Response:\nError type:"
         
 
 
@@ -221,7 +228,7 @@ def main(
                 src_line = datastore_src[i]
                 tgt_line = datastore_tgt[i]
                 prompts.append(format_in_template(src_line, tgt=tgt_line, src_name=src, tgt_name=tgt, mode=mode))
-            # prompts.append(format_in_template(test_src_line, src_name=src, tgt_name=tgt))
+            prompts.append(format_in_template(test_src_line, src_name=src, tgt_name=tgt))
             data_with_prompt.append("\n".join(prompts))
             
         return data_with_prompt
@@ -348,7 +355,8 @@ def main(
                 # print("Instruction:", instruction)
                 
             line_list.append(line)
-            prompt = prompter.generate_prompt(instruction, line.strip("\n").strip(" ") + " => ", mode=mode)
+            # prompt = prompter.generate_prompt(instruction, line.strip("\n").strip(" ") + " => ", mode=mode)
+            prompt = instruction
             # print(f"prompt is :{prompt}")
             # assert 0
             batch_list.append(prompt)
@@ -387,24 +395,6 @@ def main(
     input_file.close()
     fw_file.close()
     ###########
-
-    # testing code for readme
-    for instruction in [
-        "Tell me about alpacas.",
-        "Tell me about the president of Mexico in 2019.",
-        "Tell me about the king of France in 2019.",
-        "List all Canadian provinces in alphabetical order.",
-        "Write a Python program that prints the first 10 Fibonacci numbers.",
-        "Write a program that prints the numbers from 1 to 100. But for multiples of three print 'Fizz' instead of the number and for the multiples of five print 'Buzz'. For numbers which are multiples of both three and five print 'FizzBuzz'.",
-        # noqa: E501
-        "Tell me five words that rhyme with 'shock'.",
-        "Translate the sentence 'I have no mouth but I must scream' into Spanish.",
-        "Count up from 1 to 500.",
-    ]:
-        print("Instruction:", instruction)
-        result = evaluate(instruction, "i have an apple")
-        print(f"Response: {result}")
-        exit(0)
 
 
 if __name__ == "__main__":

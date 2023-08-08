@@ -50,9 +50,9 @@ def main(
         share_gradio: bool = False,
         batch_size: int = None,
         test_file: str = "/home/v-lbei/deen/test",
-        prompt_num: int = 1,
-        output_file: str = "./output/vicuna7b-v1.5.base",
-        mode: str = "base",
+        prompt_num: int = 5,
+        output_file: str = "./output/vicuna7b-v1.5.dtg-5shot",
+        mode: str = "dtg",
 ):
 
     print(f"base_model:{base_model}")
@@ -194,12 +194,18 @@ def main(
         #     return f"Translate {src_str} to {tgt_str}:\n\n### Input:\n{src} =>\n\n### Response:\n{tgt}"
         # else:
         #     return f"Translate {src_str} to {tgt_str}:\n\n{src} =>\n\n"
-        sys_line = "Flights from Brisbane to Amsterdam via Shanghai Pudong"
+        sys_line = ""
         assert mode == "base" or mode == "dtg", "mode must be base or dtg"
         if mode == "base":
-            return f"###USER:\nTranslate the {src_str} sentence into {tgt_str}.\n{src}\n###ASSISTANT:\n{tgt}"
+            if tgt is not None:
+                return f"###USER:\nTranslate the {src_str} sentence into {tgt_str}.\n{src}\n###ASSISTANT:\n{tgt}"
+            else:
+                return f"###USER:\nTranslate the {src_str} sentence into {tgt_str}.\n{src}\n###ASSISTANT:\n"
         elif mode == "dtg":
-            return f"###USER:\nGiven the {src_str} sentence: {src}\nthe {tgt_str} translation is: {sys_line}\nyour task is to detect the error type firstly, and refine the translation then.\n###ASSISTANT:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
+            if tgt is not None:
+                return f"### USER:\nGiven the {src_str} sentence: {src}\nthe already generated {tgt_str} translation is: {sys_line}\nPlease detect the error type firstly, and refine the translation then.\n### ASSISTANT:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
+            else:
+                return f"### USER:\nGiven the {src_str} sentence: {src}\nthe already generated {tgt_str} translation is: {sys_line}\nPlease detect the error type firstly, and refine the translation then.\n### ASSISTANT:\nError type:"
         
 
 
@@ -221,7 +227,7 @@ def main(
                 src_line = datastore_src[i]
                 tgt_line = datastore_tgt[i]
                 prompts.append(format_in_template(src_line, tgt=tgt_line, src_name=src, tgt_name=tgt, mode=mode))
-            # prompts.append(format_in_template(test_src_line, src_name=src, tgt_name=tgt))
+            prompts.append(format_in_template(test_src_line, src_name=src, tgt_name=tgt, mode=mode))
             data_with_prompt.append("\n".join(prompts))
             
         return data_with_prompt
@@ -331,6 +337,7 @@ def main(
     dataset = create_dataset(os.path.join(test_file, "dev"), os.path.join(test_file, "test"), src, tgt, prompt_num, mode=mode)
 
     # print(dataset[0])
+    # assert 0
 
     line_index = 0
     shot_line = None
@@ -345,19 +352,19 @@ def main(
             if line_index % batch_size == 0:
                 print("========================")
                 print("start generate line {}\n".format(range(line_index - batch_size, line_index - 1)))
-                # print("Instruction:", instruction)
+                # print("Instruction:", instruction[0])
+                # assert 0
                 
             line_list.append(line)
-            # prompt = prompter.generate_prompt(instruction, "Translate the German sentence into English.\n" + line.strip("\n").strip(" "), mode=mode)
-            prompt = prompter.generate_prompt(instruction, line.strip("\n").strip(" "), mode=mode)
+            # prompt = prompter.generate_prompt(instruction, line.strip("\n").strip(" "), mode=mode)
+            prompt = instruction
             # print(f"prompt is :{prompt}")
-            # assert 0
             batch_list.append(prompt)
 
         else:
             print("========================")
             print(f"start generate line {line_index}\n")
-            print("Instruction:", instruction)
+            # print("Instruction:", instruction)
 
         if batch_size is not None and batch_size != 1:
             if line_index % batch_size != 0 and line_index != input_lines_len:
