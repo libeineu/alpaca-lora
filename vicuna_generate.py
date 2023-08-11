@@ -51,7 +51,7 @@ def main(
         batch_size: int = None,
         test_file: str = "/home/v-lbei/deen/test",
         prompt_num: int = 5,
-        output_file: str = "./output/vicuna7b-v1.5.dtg-5shot",
+        output_file: str = "./output/vicuna7b-v1.5.dtg-5shot-step",
         mode: str = "dtg",
 ):
 
@@ -205,7 +205,7 @@ def main(
             if tgt is not None:
                 return f"### USER:\nGiven the {src_str} sentence: {src}\nthe already generated {tgt_str} translation is: {sys_line}\nPlease detect the error type firstly, and refine the translation then.\n### ASSISTANT:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
             else:
-                return f"### USER:\nGiven the {src_str} sentence: {src}\nthe already generated {tgt_str} translation is: {sys_line}\nPlease detect the error type firstly, and refine the translation then.\n### ASSISTANT:\nError type:"
+                return f"### USER:\nGiven the {src_str} sentence: {src}\nthe already generated {tgt_str} translation is: {sys_line}\nPlease detect the error type firstly, and refine the translation then.\n### ASSISTANT:\nLet's think step by step. Error type:"
         
 
 
