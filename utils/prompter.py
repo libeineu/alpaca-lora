@@ -30,7 +30,7 @@ class Prompter(object):
         instruction: str,
         input: Union[None, str] = None,
         label: Union[None, str] = None,
-        mode: Union[None, str] = None,
+        mode: Union[None, str] = "base",
     ) -> str:
         # returns the full prompt from instruction and optional input
         # if a label (=response, =output) is provided, it's also appended.
