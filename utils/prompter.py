@@ -34,6 +34,7 @@ class Prompter(object):
     ) -> str:
         # returns the full prompt from instruction and optional input
         # if a label (=response, =output) is provided, it's also appended.
+
         if input and mode == "base":
             res = self.template["prompt_input"].format(
                 instruction=instruction, input=input
