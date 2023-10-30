@@ -50,9 +50,9 @@ def main(
         share_gradio: bool = False,
         batch_size: int = None,
         test_file: str = "/home/v-lbei/simplification/",
-        prompt_num: int = 5,
-        output_file: str = "./vicuna-simplification-dtg-5shot-v2",
-        mode: str = "dtg",
+        prompt_num: int = 1,
+        output_file: str = "output/vicuna33b-v1.3.simplification.base",
+        mode: str = "base",
 ):
 
     print(f"base_model:{base_model}")
@@ -131,12 +131,12 @@ def main(
         tgt_name="zh",
         mode='base'):
 
-        sys_line = "Rollins retired in 1962 and become a coach."
+        sys_line = " "
         assert mode == "base" or mode == "dtg", "mode must be base or dtg"
         if mode == "base":
             return f"###USER: Please provide the simplification of the following paragraph:\n{src}\n###ASSISTANT:\n{tgt}"
         elif mode == "dtg":
-            return f"###USER:\nGiven the English paragraph: {src}\nthe already generated simplification is: {sys_line}\nPlease detect the error type firstly, and provide the refined simplification of the given paragraph\n###ASSISTANT:\nError type: incorrect simplification, the refined simplification is: {tgt}"
+            return f"###USER:\nGiven the English paragraph: {src}\nthe already generated simplification is: {sys_line}\nPlease detect the error type firstly, and provide the correct simplification of the given paragraph\n###ASSISTANT:\nError type: incorrect simplification, the refined simplification is: {tgt}"
         
     def create_dataset(data_store_path, test_data_path,
             src="en", 
@@ -324,23 +324,23 @@ def main(
     fw_file.close()
     ###########
 
-    # testing code for readme
-    for instruction in [
-        "Tell me about alpacas.",
-        "Tell me about the president of Mexico in 2019.",
-        "Tell me about the king of France in 2019.",
-        "List all Canadian provinces in alphabetical order.",
-        "Write a Python program that prints the first 10 Fibonacci numbers.",
-        "Write a program that prints the numbers from 1 to 100. But for multiples of three print 'Fizz' instead of the number and for the multiples of five print 'Buzz'. For numbers which are multiples of both three and five print 'FizzBuzz'.",
-        # noqa: E501
-        "Tell me five words that rhyme with 'shock'.",
-        "Translate the sentence 'I have no mouth but I must scream' into Spanish.",
-        "Count up from 1 to 500.",
-    ]:
-        print("Instruction:", instruction)
-        result = evaluate(instruction, "i have an apple")
-        print(f"Response: {result}")
-        exit(0)
+    # # testing code for readme
+    # for instruction in [
+    #     "Tell me about alpacas.",
+    #     "Tell me about the president of Mexico in 2019.",
+    #     "Tell me about the king of France in 2019.",
+    #     "List all Canadian provinces in alphabetical order.",
+    #     "Write a Python program that prints the first 10 Fibonacci numbers.",
+    #     "Write a program that prints the numbers from 1 to 100. But for multiples of three print 'Fizz' instead of the number and for the multiples of five print 'Buzz'. For numbers which are multiples of both three and five print 'FizzBuzz'.",
+    #     # noqa: E501
+    #     "Tell me five words that rhyme with 'shock'.",
+    #     "Translate the sentence 'I have no mouth but I must scream' into Spanish.",
+    #     "Count up from 1 to 500.",
+    # ]:
+    #     print("Instruction:", instruction)
+    #     result = evaluate(instruction, "i have an apple")
+    #     print(f"Response: {result}")
+    #     exit(0)
 
 
 if __name__ == "__main__":

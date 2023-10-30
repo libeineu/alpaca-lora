@@ -50,8 +50,8 @@ def main(
         share_gradio: bool = False,
         batch_size: int = None,
         test_file: str = "/home/v-lbei/deen/test",
-        prompt_num: int = 5,
-        output_file: str = "./output/vicuna7b-v1.5.dtg-5shot-step",
+        prompt_num: int = 2,
+        output_file: str = "./output/vicuna33b-v1.3.dtg.error",
         mode: str = "dtg",
 ):
 
@@ -198,14 +198,14 @@ def main(
         assert mode == "base" or mode == "dtg", "mode must be base or dtg"
         if mode == "base":
             if tgt is not None:
-                return f"###USER:\nTranslate the {src_str} sentence into {tgt_str}.\n{src}\n###ASSISTANT:\n{tgt}"
+                return f"### USER:\nTranslate the {src_str} sentence into {tgt_str}.\n{src}\n### ASSISTANT:\n{tgt}"
             else:
-                return f"###USER:\nTranslate the {src_str} sentence into {tgt_str}.\n{src}\n###ASSISTANT:\n"
+                return f"### USER:\nTranslate the {src_str} sentence into {tgt_str}.\n{src}\n### ASSISTANT:\n"
         elif mode == "dtg":
             if tgt is not None:
-                return f"### USER:\nGiven the {src_str} sentence: {src}\nthe already generated {tgt_str} translation is: {sys_line}\nPlease detect the error type firstly, and refine the translation then.\n### ASSISTANT:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
+                return f"### USER:\nGiven the {src_str} sentence: {src}\nthe already generated {tgt_str} translation is: {sys_line}\nPlease detect the error type firstly, and refine the translation then. The error type may contain incorrect translation, no translation, incorrect word translation, grammar error, under translation, incorrect entity translation, word order error and word repetition.\n### ASSISTANT:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
             else:
-                return f"### USER:\nGiven the {src_str} sentence: {src}\nthe already generated {tgt_str} translation is: {sys_line}\nPlease detect the error type firstly, and refine the translation then.\n### ASSISTANT:\nLet's think step by step. Error type:"
+                return f"### USER:\nGiven the {src_str} sentence: {src}\nthe already generated {tgt_str} translation is: {sys_line}\nPlease detect the error type firstly, and refine the translation then. The error type may contain incorrect translation, no translation, incorrect word translation, grammar error, under translation, incorrect entity translation, word order error and word repetition.\n### ASSISTANT:\nError type:"
         
 
 

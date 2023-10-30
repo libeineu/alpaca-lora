@@ -3,5 +3,5 @@
     "prompt_input": "A chat between a curious user and an artificial intelligence assistant.\n{instruction}\n###USER:\n\nGiven the English dialogue: {input}\n please summarize the main context\n###ASSISTANT:\n",
     "prompt_input_dtg": "A chat between a curious user and an artificial intelligence assistant.\n{instruction}\n###USER:\nGiven the English dialogue: {input}\nthe already summarized main abstraction of the dialogue is: .\nPlease detect the error type firstly, and provide the refined summarization of given dialogue\n###ASSISTANT:\n",
     "prompt_no_input": "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{instruction}\n\n### Response:\n",
-    "response_split": "###ASSISTANT:"    
+    "response_split": "### ASSISTANT:"    
 }

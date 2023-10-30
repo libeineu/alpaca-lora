@@ -50,8 +50,8 @@ def main(
         share_gradio: bool = False,
         batch_size: int = None,
         test_file: str = "/home/v-lbei/deen/test",
-        prompt_num: int = 1,
-        output_file: str = "./alpaca7b_5shot_dtg",
+        prompt_num: int = 5,
+        output_file: str = "./llama2_1shot_dtg",
         mode: str = "dtg",
 ):
 
@@ -204,9 +204,9 @@ def main(
                 return f"Translate {src_str} to {tgt_str}:\n\n### Input:\n{src} =>\n\n### Response:"
         elif mode == "dtg":
             if tgt is not None:
-                return f"Translate {src_str} into {tgt_str}. Given the {src_str} sentence and the {tgt_str} translation, please detect the error type firstly, and refine the translation then:\n### Input:\nsource sentence: {src}\nthe already generated target sentence is {sys_line}.\n### Response:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
+                return f"Translate {src_str} into {tgt_str}. Let's think step by step. Given the {src_str} sentence and the {tgt_str} translation, please detect the error type firstly, and refine the translation then:\n### Input:\nsource sentence: {src}\nthe already generated target sentence is {sys_line}.\n### Response:\nError type: incorrect translation, the refined {tgt_str} translation is: {tgt}"
             else:
-                return f"Translate {src_str} into {tgt_str}. Given the {src_str} sentence and the {tgt_str} translation, please detect the error type firstly, and refine the translation then:\n### Input:\nsource sentence: {src}\nthe already generated target sentence is {sys_line}.\n### Response:\nError type:"
+                return f"Translate {src_str} into {tgt_str}. Let's think step by step. Given the {src_str} sentence and the {tgt_str} translation, please detect the error type firstly, and refine the translation then:\n### Input:\nsource sentence: {src}\nthe already generated target sentence is {sys_line}.\n### Response:\nError type:"
         
 
 
@@ -228,7 +228,7 @@ def main(
                 src_line = datastore_src[i]
                 tgt_line = datastore_tgt[i]
                 prompts.append(format_in_template(src_line, tgt=tgt_line, src_name=src, tgt_name=tgt, mode=mode))
-            prompts.append(format_in_template(test_src_line, src_name=src, tgt_name=tgt))
+            prompts.append(format_in_template(test_src_line, src_name=src, tgt_name=tgt, mode=mode))
             data_with_prompt.append("\n".join(prompts))
             
         return data_with_prompt
@@ -353,6 +353,7 @@ def main(
                 print("========================")
                 print("start generate line {}\n".format(range(line_index - batch_size, line_index - 1)))
                 # print("Instruction:", instruction)
+                # assert 0
                 
             line_list.append(line)
             # prompt = prompter.generate_prompt(instruction, line.strip("\n").strip(" ") + " => ", mode=mode)
